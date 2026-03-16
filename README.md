@@ -91,3 +91,41 @@ GOOGLE_PROJECT_ID=<project-id> REGION=us-central1 STACK_NAME=osirus-ai ./gcp.sh 
 
 - Keep `terraform/*.tfvars` local and untracked.
 - Never commit real API keys, tokens, or service account secrets.
+
+## LLM Request Flow Diagram (Vertex Search + Vertex AI)
+
+```text
+User UI
+  |
+  | 1) Prompt / task request
+  v
+Osirus API (Cloud Run)
+  |
+  | 2) Prefetch context (RAG/search grounding)
+  v
+Vertex AI Search (Vertex Search)
+  |
+  | 3) Ranked docs/snippets returned
+  v
+Osirus API (context assembly + prompt building)
+  |
+  | 4) Model invocation
+  v
+Vertex AI Model Endpoint
+  |\
+  | \-- Gemini (text/multimodal)
+  | \-- Nano Banana (configured model route)
+  |
+  | 5) Model output
+  v
+Osirus API (post-processing, policy/formatting)
+  |
+  | 6) API response / stream
+  v
+User UI
+```
+
+Notes:
+- The API orchestrates both retrieval (Vertex Search) and generation (Vertex AI).
+- Provider/model choice is controlled by API routing/config (for example Gemini vs Nano Banana).
+- The same response path returns to the UI regardless of chosen model.

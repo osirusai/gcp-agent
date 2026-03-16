@@ -1,0 +1,92 @@
+# Required
+project_id                = "your-gcp-project-id"
+region                    = "us-central1"
+stack_name                = "osirus-ai"
+deployment_mode           = "standalone" # standalone | aws_attached
+manage_project_services   = true         # set false if your IAM cannot list/enable APIs
+provider_domain_map       = "" # e.g. "gemini.example.com:google,bedrock.example.com:aws"
+app_container_image       = "docker.io/mediacoin/osirus-ai:latest"
+api_container_image       = "docker.io/mediacoin/osirus-ai-api:latest"
+migration_container_image = "docker.io/mediacoin/osirus-ai-api-migrations:latest"
+dockerhub_use_remote_repository = false
+dockerhub_remote_repository_id  = "dockerhub-remote"
+dockerhub_username              = ""
+dockerhub_password_secret_id    = "" # projects/<project-id>/secrets/<secret-name>
+dockerhub_password_secret_version = "" # projects/<project-id>/secrets/<secret-name>/versions/1
+database_password         = "CHANGE_ME"
+runtime_service_account_email      = ""  # optional existing SA email, e.g. osirus-runtime@project.iam.gserviceaccount.com
+manage_runtime_service_account_roles = true # set false if IAM role binding is managed outside Terraform
+cloud_run_deletion_protection      = false
+
+# Optional domain and HTTPS
+# domain_name = "app.example.com"
+
+# Optional runtime tuning (small test profile; increase for production)
+instance_count          = 0
+app_service_cpu         = "1"
+app_service_memory      = "512Mi"
+api_service_cpu         = "1"
+api_service_memory      = "512Mi"
+searxng_sidecar_cpu     = "1"
+searxng_sidecar_memory  = "512Mi"
+database_tier           = "db-custom-1-3840"
+database_disk_size_gb   = 10
+redis_memory_size_gb    = 1
+deletion_protection     = false
+searxng_secret          = "CHANGE_ME_SEARXNG_SECRET"
+redis_tls               = "true"
+token_encrypt_vector    = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+
+# Optional OpenSearch endpoint
+# Set either opensearch_node_url OR opensearch_host/opensearch_port.
+# opensearch_node_url = "https://cluster.region.gcp.elastic-cloud.com:443"
+opensearch_host     = ""
+opensearch_port     = "9200"
+opensearch_protocol = "http"
+
+# AWS attachment mode inputs (required when deployment_mode = "aws_attached")
+# aws_database_host      = "my-stack-rds.abc123.us-east-1.rds.amazonaws.com"
+# aws_database_name      = "mediasite"
+# aws_database_port      = 3306
+# aws_database_username  = "root"
+# aws_redis_host         = "my-stack-redis.abc123.use1.cache.amazonaws.com"
+# aws_redis_port         = 6379
+# aws_assets_bucket_name = "my-aws-assets-bucket"
+# opensearch_host        = "vpc-my-stack-search-abc123.us-east-1.es.amazonaws.com"
+# opensearch_port        = "443"
+# opensearch_protocol    = "https"
+
+# Optional integration keys
+customer_io_api_key          = ""
+customer_io_tracking_api_key = ""
+customer_io_site_id          = ""
+stripe_publishable_key       = ""
+stripe_secret_key            = ""
+stripe_webhook_secret_key    = ""
+gtm_id                       = ""
+recaptcha_site_key           = ""
+recaptcha_secret_key         = ""
+bedrock_aws_access_key_id    = ""
+bedrock_aws_secret_access_key = ""
+bedrock_aws_region           = ""
+openai_api_key               = ""
+huggingface_api_token        = ""
+anthropic_api_key            = ""
+google_api_key               = ""
+google_project_id_runtime    = ""
+google_location              = ""
+google_service_account_json  = ""
+maginary_api_key             = ""
+
+# Optional token/auth settings
+session_secret    = "secret"
+token_pepper      = ""
+token_prefix      = ""
+token_byte_length = ""
+
+# Optional asset/network overrides
+enable_cdn          = false
+assets_bucket_name  = ""
+image_base_url      = ""
+subnet_cidr         = "10.40.0.0/24"
+vpc_connector_cidr  = "10.40.8.0/28"

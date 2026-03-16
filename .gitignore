@@ -2,3 +2,11 @@
 .env.*
 *.local
 .DS_Store
+
+# Local Terraform variable files (may include secrets)
+terraform/terraform.tfvars
+terraform/terraform.launch.tfvars
+*.tfvars
+*.tfstate
+*.tfstate.*
+.terraform/

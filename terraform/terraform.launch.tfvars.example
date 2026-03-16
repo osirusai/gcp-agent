@@ -1,0 +1,34 @@
+# Copy to terraform.launch.tfvars (git-excluded) and fill values for your environment.
+
+# Core runtime secrets
+database_password          = "CHANGE_ME"
+searxng_secret             = "CHANGE_ME"
+session_secret             = "CHANGE_ME"
+token_encrypt_vector       = "CHANGE_ME_64_HEX"
+redis_tls                  = "false"
+
+# Optional external integrations
+openai_api_key             = ""
+anthropic_api_key          = ""
+google_api_key             = ""
+huggingface_api_token      = ""
+stripe_secret_key          = ""
+stripe_webhook_secret_key  = ""
+
+# Optional Docker Hub private image proxy (recommended over plain DOCKERHUB creds in env)
+# dockerhub_use_remote_repository   = true
+# dockerhub_remote_repository_id    = "dockerhub-remote"
+# dockerhub_username                = "your_dockerhub_username"
+# dockerhub_password_secret_id      = "projects/<project-id>/secrets/dockerhub-pat"
+# dockerhub_password_secret_version = "projects/<project-id>/secrets/dockerhub-pat/versions/1"
+
+# Optional test-size overrides
+# instance_count              = 0
+# app_service_memory          = "512Mi"
+# api_service_memory          = "512Mi"
+# searxng_sidecar_memory      = "512Mi"
+# database_tier               = "db-custom-1-3840"
+# database_disk_size_gb       = 10
+# redis_memory_size_gb        = 1
+# deletion_protection         = false
+# cloud_run_deletion_protection = false

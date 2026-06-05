@@ -1,0 +1,84 @@
+# Before using this workflow:
+# 1. In Osirus, open Settings > API Tokens and create a token for this repository.
+# 2. In GitHub, open your repository Settings > Secrets and variables > Actions.
+# 3. Add a New repository secret named OSIRUS_API_TOKEN and paste the token value.
+# 4. Commit this file as .github/workflows/osirus-ai-code-review.yml.
+
+name: AI Code Review
+
+on:
+  pull_request:
+
+jobs:
+  ai-code-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Ask Osirus agent to review the diff
+        env:
+          OSIRUS_API_TOKEN: ${{ secrets.OSIRUS_API_TOKEN }}
+          OSIRUS_AGENT_ID: 8a00fe00-605a-11f1-82cd-2d24d0550b1b
+          OSIRUS_API_BASE: http://host.docker.internal:3001/api
+          BASE_SHA: origin/${{ github.base_ref }}
+        run: |
+          # Required secret/env var:
+          #   OSIRUS_API_TOKEN: create in Osirus API Tokens, then store in your CI secret manager.
+          # Optional env vars:
+          #   OSIRUS_AGENT_ID, OSIRUS_API_BASE, BASE_SHA
+          set -euo pipefail
+
+          : "${OSIRUS_API_TOKEN:?Set OSIRUS_API_TOKEN in your CI secrets}"
+          OSIRUS_AGENT_ID="${OSIRUS_AGENT_ID:-8a00fe00-605a-11f1-82cd-2d24d0550b1b}"
+          OSIRUS_API_BASE="${OSIRUS_API_BASE:-http://host.docker.internal:3001/api}"
+          BASE_SHA="${BASE_SHA:-origin/main}"
+
+          if [ "${BASE_SHA#origin/}" != "$BASE_SHA" ]; then
+            BASE_BRANCH="${BASE_SHA#origin/}"
+            git fetch origin "$BASE_BRANCH:refs/remotes/origin/$BASE_BRANCH" --depth=100 >/dev/null 2>&1 || true
+          fi
+          DIFF="$(git diff --no-color --unified=0 "$BASE_SHA"...HEAD || git diff --no-color --unified=0 HEAD~1 HEAD)"
+          DIFF="${DIFF:0:60000}"
+
+          if [ -z "$DIFF" ]; then
+            echo "No code changes to review."
+            exit 0
+          fi
+
+          PAYLOAD="$(jq -n --arg diff "$DIFF" '{
+            messages: [
+              {
+                role: "system",
+                content: "You are a senior code reviewer. Review only the provided diff. Flag correctness, security, data-loss, performance, maintainability, and missing-test risks."
+              },
+              {
+                role: "user",
+                content: ("Review only this diff. Return concise markdown with severity, file or line reference when possible, recommended fix, and tests to add. You MUST end with exactly one final line: REVIEW_DECISION=pass or REVIEW_DECISION=fail. Use fail only for high-confidence blocking issues.\n\nDiff:\n" + $diff)
+              }
+            ],
+            temperature: 0.1,
+            max_tokens: 1200
+          }')"
+
+          RESPONSE="$(curl -sS -X POST "$OSIRUS_API_BASE/agents/$OSIRUS_AGENT_ID/v1/chat/completions" \
+            -H "Authorization: Bearer $OSIRUS_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD")"
+
+          REVIEW="$(printf '%s' "$RESPONSE" | jq -r '.choices[0].message.content // .output_text // .error.message // .error // empty')"
+          if [ -z "$REVIEW" ]; then
+            echo "$RESPONSE"
+            exit 1
+          fi
+
+          printf '%s\n' "$REVIEW"
+          if printf '%s\n' "$REVIEW" | grep -Eq "^REVIEW_DECISION=fail$"; then
+            exit 1
+          fi
+          if ! printf '%s\n' "$REVIEW" | grep -Eq "^REVIEW_DECISION=pass$"; then
+            echo "Review did not include REVIEW_DECISION=pass or REVIEW_DECISION=fail"
+            exit 1
+          fi

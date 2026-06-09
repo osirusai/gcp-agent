@@ -54,6 +54,12 @@ In `aws_attached` mode, routing and runtime remain on GCP. `gcp.sh` resolves AWS
 - `terraform/` Terraform modules, providers, and example variables
 - `gcp.sh` wrapper for init, plan, apply, destroy, bootstrap, and migration workflows
 
+## Prerequisites
+
+- Google Cloud project with billing enabled
+- `gcloud` CLI authenticated for the target project
+- Terraform installed locally
+
 ## Quickstart
 
 1. Create local tfvars from examples:
@@ -65,7 +71,7 @@ cp terraform/terraform.launch.tfvars.example terraform/terraform.launch.tfvars
 
 2. Edit local tfvars with your project, image, and secret values.
 
-3. Run deploy workflow:
+3. Run the standalone deploy workflow:
 
 ```bash
 ./gcp.sh init
@@ -74,6 +80,8 @@ cp terraform/terraform.launch.tfvars.example terraform/terraform.launch.tfvars
 ```
 
 ## AWS-Attached Mode
+
+Use this mode when Cloud Run should stay on GCP but the data plane should use an existing AWS stack.
 
 ```bash
 AWS_STACK_NAME=<aws-stack-name> AWS_REGION=us-east-1 ./gcp.sh plan aws_attached

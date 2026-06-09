@@ -21,8 +21,8 @@ jobs:
       - name: Ask Osirus agent to review the diff
         env:
           OSIRUS_API_TOKEN: ${{ secrets.OSIRUS_API_TOKEN }}
-          OSIRUS_AGENT_ID: 8a00fe00-605a-11f1-82cd-2d24d0550b1b
-          OSIRUS_API_BASE: http://host.docker.internal:3001/api
+          OSIRUS_AGENT_ID: 17900df0-5f5d-11f1-b237-9dfe96f02121
+          OSIRUS_API_BASE: https://osirus.ai/api
           BASE_SHA: origin/${{ github.base_ref }}
         run: |
           # Required secret/env var:
@@ -32,8 +32,8 @@ jobs:
           set -euo pipefail
 
           : "${OSIRUS_API_TOKEN:?Set OSIRUS_API_TOKEN in your CI secrets}"
-          OSIRUS_AGENT_ID="${OSIRUS_AGENT_ID:-8a00fe00-605a-11f1-82cd-2d24d0550b1b}"
-          OSIRUS_API_BASE="${OSIRUS_API_BASE:-http://host.docker.internal:3001/api}"
+          OSIRUS_AGENT_ID="${OSIRUS_AGENT_ID:-17900df0-5f5d-11f1-b237-9dfe96f02121}"
+          OSIRUS_API_BASE="${OSIRUS_API_BASE:-https://osirus.ai/api}"
           BASE_SHA="${BASE_SHA:-origin/main}"
 
           if [ "${BASE_SHA#origin/}" != "$BASE_SHA" ]; then

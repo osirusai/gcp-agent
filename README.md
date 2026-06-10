@@ -1,22 +1,22 @@
 # Osirus AI GCP DevOps
 
-Terraform-based GCP deployment package for Osirus AI.
+Terraform-based GCP deployment package for Osirus AI services.
 
 ## Architecture
 
 This stack deploys a production-style, serverless-first GCP architecture:
 
-1. Global HTTP(S) load balancing routes traffic to Cloud Run services (`app`, `api`).
-2. API runs with a sidecar (`searxng`) on Cloud Run.
+1. Global HTTP(S) load balancing routes traffic to Cloud Run services (`app` and `api`).
+2. The API runs on Cloud Run with a `searxng` sidecar.
 3. Data plane services:
-- Cloud SQL (MySQL)
-- Memorystore (Redis)
-- Cloud Storage assets bucket
+   - Cloud SQL (MySQL)
+   - Memorystore (Redis)
+   - Cloud Storage assets bucket
 4. Optional domain + managed certificate for HTTPS.
 5. Cloud Run Job executes database migrations.
 6. Secret Manager + IAM secure runtime secrets and access.
 
-`aws_attached` mode is also supported, where Cloud Run/LB stays on GCP while data services come from AWS stack outputs.
+`aws_attached` mode is also supported. In that mode, Cloud Run and the load balancer stay on GCP while data service endpoints come from AWS stack outputs.
 
 ## Architecture Diagram
 
@@ -43,16 +43,22 @@ Ops path:
 - Cloud Logging/Monitoring via Cloud Run + GCP platform services
 ```
 
-## How osirus.ai API Connects to GCP Services
+## API Connectivity
 
-In `standalone` mode, `osirus.ai` traffic reaches the GCP load balancer and is routed to the `api` Cloud Run service. The API then connects to Cloud SQL (DB), Memorystore (Redis), Cloud Storage (assets/files), and configured OpenSearch endpoint values from runtime environment/secrets.
+In `standalone` mode, `osirus.ai` traffic reaches the GCP load balancer and is routed to the `api` Cloud Run service. The API then connects to Cloud SQL, Memorystore, Cloud Storage, and the configured OpenSearch endpoint using runtime environment values and secrets.
 
-In `aws_attached` mode, routing and runtime remain on GCP (Load Balancer + Cloud Run), but `gcp.sh` resolves AWS CloudFormation outputs and injects those endpoints into Terraform variables, so the same API container connects to AWS-hosted DB/Redis/S3/OpenSearch instead of GCP-managed equivalents.
+In `aws_attached` mode, routing and runtime remain on GCP. `gcp.sh` resolves AWS CloudFormation outputs and injects those endpoints into Terraform variables, so the same API container connects to AWS-hosted DB, Redis, S3, and OpenSearch services instead of GCP-managed equivalents.
 
 ## Repo Layout
 
-- `terraform/` Terraform modules, providers, and examples
-- `gcp.sh` clean wrapper for init/plan/apply/destroy/bootstrap/migrations
+- `terraform/` Terraform modules, providers, and example variables
+- `gcp.sh` wrapper for init, plan, apply, destroy, bootstrap, and migration workflows
+
+## Prerequisites
+
+- Google Cloud project with billing enabled
+- `gcloud` CLI authenticated for the target project
+- Terraform installed locally
 
 ## Quickstart
 
@@ -63,9 +69,9 @@ cp terraform/terraform.tfvars.example terraform/terraform.tfvars
 cp terraform/terraform.launch.tfvars.example terraform/terraform.launch.tfvars
 ```
 
-2. Edit local tfvars with your project/images/secrets.
+2. Edit local tfvars with your project, image, and secret values.
 
-3. Run deploy workflow:
+3. Run the standalone deploy workflow:
 
 ```bash
 ./gcp.sh init
@@ -74,6 +80,8 @@ cp terraform/terraform.launch.tfvars.example terraform/terraform.launch.tfvars
 ```
 
 ## AWS-Attached Mode
+
+Use this mode when Cloud Run should stay on GCP but the data plane should use an existing AWS stack.
 
 ```bash
 AWS_STACK_NAME=<aws-stack-name> AWS_REGION=us-east-1 ./gcp.sh plan aws_attached

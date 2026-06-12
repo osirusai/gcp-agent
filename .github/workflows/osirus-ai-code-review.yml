@@ -2,18 +2,21 @@
 # 1. In Osirus, open Settings > API Tokens and create a token for this repository.
 # 2. In GitHub, open your repository Settings > Secrets and variables > Actions.
 # 3. Add a New repository secret named OSIRUS_API_TOKEN and paste the token value.
-# 4. Commit this file as .github/workflows/osirus-ai-code-review.yml.
-
-# Before using this workflow:
-# 1. In Osirus, open Settings > API Tokens and create a token for this repository.
-# 2. In GitHub, open your repository Settings > Secrets and variables > Actions.
-# 3. Add a New repository secret named OSIRUS_API_TOKEN and paste the token value.
-# 4. Commit this file as .github/workflows/osirus-ai-code-review.yml.
+# 4. Add a New repository secret named OSIRUS_AGENT_ID and paste the agent id.
+# 5. Commit this file as .github/workflows/osirus-ai-code-review.yml.
 
 name: AI Code Review
 
 on:
   pull_request:
+  push:
+    branches:
+      - 'feature/**'
+      - 'develop'
+      - 'release/**'
+      - 'hotfix/**'
+      - 'main'
+      - 'master'
 
 jobs:
   ai-code-review:
@@ -27,7 +30,7 @@ jobs:
       - name: Ask Osirus agent to review the diff
         env:
           OSIRUS_API_TOKEN: ${{ secrets.OSIRUS_API_TOKEN }}
-          OSIRUS_AGENT_ID: 17900df0-5f5d-11f1-b237-9dfe96f02121
+          OSIRUS_AGENT_ID: ${{ secrets.OSIRUS_AGENT_ID }}
           OSIRUS_API_BASE: https://osirus.ai/api
           OSIRUS_REVIEW_SCRIPT_URL: https://s3.amazonaws.com/osirusai/scripts/osirus-code-review.sh
           BASE_SHA: origin/${{ github.base_ref }}

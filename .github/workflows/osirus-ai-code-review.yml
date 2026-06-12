@@ -33,7 +33,7 @@ jobs:
           OSIRUS_AGENT_ID: ${{ secrets.OSIRUS_AGENT_ID }}
           OSIRUS_API_BASE: https://osirus.ai/api
           OSIRUS_REVIEW_SCRIPT_URL: https://s3.amazonaws.com/osirusai/scripts/osirus-code-review.sh
-          BASE_SHA: origin/${{ github.base_ref }}
+          BASE_SHA: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || 'origin/develop' }}
         run: |
           set -euo pipefail
           curl -fsSL "$OSIRUS_REVIEW_SCRIPT_URL" -o /tmp/osirus-code-review.sh

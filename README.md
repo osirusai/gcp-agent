@@ -99,6 +99,7 @@ GOOGLE_PROJECT_ID=<project-id> REGION=us-central1 STACK_NAME=osirus-ai ./gcp.sh 
 
 - Keep `terraform/*.tfvars` local and untracked.
 - Never commit real API keys, tokens, or service account secrets.
+- Remove temporary CI or code-review test files before opening production PRs.
 
 ## LLM Request Flow Diagram (Vertex Search + Vertex AI)
 
